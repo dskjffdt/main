@@ -1,0 +1,23 @@
+{
+  "name": "zk-circuit",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "成绩披露用 Circom 电路：Poseidon Merkle + 成绩区间，配合 snarkjs trusted setup",
+  "main": "index.js",
+  "scripts": {
+    "compile": "circom circuit.circom --r1cs --wasm --sym -o build",
+    "setup": "snarkjs groth16 setup build/circuit.r1cs pot14_final.ptau circuit_final.zkey && snarkjs zkey export verificationkey circuit_final.zkey verification_key.json",
+    "export": "snarkjs zkey export solidityverifier circuit_final.zkey verifier.sol",
+    "merkle": "node tools/merkle_witness.js",
+    "data": "node tools/merkle_data.js",
+    "sync": "node scripts/sync_verifier.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
+    "snarkjs": "^0.7.6"
+  }
+}

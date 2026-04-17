@@ -1,0 +1,42 @@
+# 依赖
+node_modules/
+
+# 环境变量与密钥（切勿提交）
+.env
+.env.*
+!.env.example
+
+# Hardhat
+onchain/artifacts/
+onchain/cache/
+onchain/typechain-types/
+onchain/deployed.json
+
+# Circom / snarkjs 构建与大型产物
+zk_circuit/build/
+zk_circuit/generated/
+*.zkey
+*.ptau
+pot*.ptau
+pot*_final.ptau
+
+# 前端构建
+grade_disclosure/client/dist/
+*.local
+
+# 操作系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# 日志与调试
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 测试覆盖率
+coverage/
+.nyc_output/

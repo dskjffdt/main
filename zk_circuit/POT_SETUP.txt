@@ -1,0 +1,9 @@
+Groth16 可信设置与 powers of tau
+================================
+
+默认 npm run setup 使用本目录下的 pot14_final.ptau。
+
+当前电路（Merkle 深度 19）编译后约束数约 1 万级，pot14（2^14）足够。
+
+若你之后增大电路导致约束数超过 2^14，请换用更高阶 ptau（如 powersOfTau28_hez_final_20.ptau），
+并相应修改 package.json 中 setup 命令里的文件名。

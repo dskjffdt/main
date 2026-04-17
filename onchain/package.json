@@ -1,0 +1,20 @@
+{
+  "name": "grade-disclosure-onchain",
+  "version": "1.0.0",
+  "private": true,
+  "description": "成绩披露：Geth/兼容链上部署 Groth16 验证合约与 Registry",
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deploy.js --network geth",
+    "root": "hardhat run scripts/setRegistryRoot.js --network geth",
+    "verify": "hardhat run scripts/verifyOnChain.js --network geth"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "dotenv": "^17.4.2",
+    "hardhat": "^2.22.0"
+  },
+  "dependencies": {
+    "ethers": "^6.13.0"
+  }
+}

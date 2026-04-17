@@ -1,0 +1,21 @@
+{
+  "name": "grade-disclosure",
+  "version": "1.0.0",
+  "description": "基于零知识证明的学生成绩披露（Groth16 + 链上验证）",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "concurrently -k \"node src/index.js\" \"npm run dev --prefix client\""
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "ethers": "^6.13.0",
+    "express": "^4.21.0",
+    "snarkjs": "^0.7.5"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
