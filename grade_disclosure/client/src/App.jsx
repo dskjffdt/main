@@ -19,6 +19,7 @@ function formatVerifyResult(data) {
 }
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState("prove");
   const [config, setConfig] = useState(null);
   const [outDir, setOutDir] = useState("");
 
@@ -118,7 +119,9 @@ export default function App() {
         <h2 className="card__title">保存位置</h2>
         <label className="field">
           <span className="field__label">文件夹</span>
-          <p className="field__desc">请选择本机上的一个文件夹，用于保存生成的证明（需有写入权限）。</p>
+          <p className="field__desc">
+            生成本地证明时写入；在线核验时从此处读取 proof.json、public.json（需有读写权限）。
+          </p>
           <input
             className="field__input"
             value={outDir}
@@ -129,61 +132,104 @@ export default function App() {
         </label>
       </section>
 
-      <form className="card" onSubmit={handleProve}>
-        <h2 className="card__title">成绩与身份参数</h2>
-        <div className="field-row">
-          <label className="field">
-            <span className="field__label">成绩下限</span>
-            <input className="field__input" value={min} onChange={(e) => setMin(e.target.value)} />
-          </label>
-          <label className="field">
-            <span className="field__label">成绩上限</span>
-            <input className="field__input" value={max} onChange={(e) => setMax(e.target.value)} />
-          </label>
-        </div>
-        <div className="field-row">
-          <label className="field">
-            <span className="field__label">科目编号</span>
-            <input className="field__input" value={subjectId} onChange={(e) => setSubjectId(e.target.value)} />
-          </label>
-          <label className="field">
-            <span className="field__label">成绩</span>
-            <input className="field__input" value={grade} onChange={(e) => setGrade(e.target.value)} />
-          </label>
-        </div>
-        <label className="field">
-          <span className="field__label">学生承诺（标识）</span>
-          <input
-            className="field__input"
-            value={studentCommit}
-            onChange={(e) => setStudentCommit(e.target.value)}
-          />
-        </label>
-        <label className="field">
-          <span className="field__label">公示序号（0～{config?.maxLeaf ?? "524287"}）</span>
-          <input className="field__input" value={leafIndex} onChange={(e) => setLeafIndex(e.target.value)} />
-        </label>
-        <div className="btn-row">
-          <button type="submit" className="btn btn--primary" disabled={loading}>
-            {loading ? "处理中…" : "生成本地证明"}
+      <div className="card card--tabs">
+        <div className="tabs" role="tablist" aria-label="证明与核验">
+          <button
+            type="button"
+            role="tab"
+            id="tab-prove"
+            aria-selected={activeTab === "prove"}
+            aria-controls="panel-prove"
+            className={`tabs__btn ${activeTab === "prove" ? "tabs__btn--active" : ""}`}
+            onClick={() => setActiveTab("prove")}
+          >
+            生成本地证明
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="tab-verify"
+            aria-selected={activeTab === "verify"}
+            aria-controls="panel-verify"
+            className={`tabs__btn ${activeTab === "verify" ? "tabs__btn--active" : ""}`}
+            onClick={() => setActiveTab("verify")}
+          >
+            在线核验
           </button>
         </div>
-        {proveMsg && <pre className="output output--prove section-gap">{proveMsg}</pre>}
-      </form>
 
-      <form className="card section-gap" onSubmit={handleVerify}>
-        <h2 className="card__title">在线核验</h2>
-        <p className="hint">将使用上方保存位置中的证明，向平台申请核验。</p>
-        <div className="btn-row">
-          <button type="submit" className="btn btn--secondary" disabled={loading || !chainReady}>
-            提交核验
-          </button>
-        </div>
-        {!chainReady && config && !config.error && (
-          <p className="hint">该功能暂未向本机开放，请联系单位管理员。</p>
+        {activeTab === "prove" && (
+          <form
+            id="panel-prove"
+            role="tabpanel"
+            aria-labelledby="tab-prove"
+            className="tabs__panel"
+            onSubmit={handleProve}
+          >
+            <h2 className="card__title card__title--in-tab">成绩与身份参数</h2>
+            <div className="field-row">
+              <label className="field">
+                <span className="field__label">成绩下限</span>
+                <input className="field__input" value={min} onChange={(e) => setMin(e.target.value)} />
+              </label>
+              <label className="field">
+                <span className="field__label">成绩上限</span>
+                <input className="field__input" value={max} onChange={(e) => setMax(e.target.value)} />
+              </label>
+            </div>
+            <div className="field-row">
+              <label className="field">
+                <span className="field__label">科目编号</span>
+                <input className="field__input" value={subjectId} onChange={(e) => setSubjectId(e.target.value)} />
+              </label>
+              <label className="field">
+                <span className="field__label">成绩</span>
+                <input className="field__input" value={grade} onChange={(e) => setGrade(e.target.value)} />
+              </label>
+            </div>
+            <label className="field">
+              <span className="field__label">学生承诺（标识）</span>
+              <input
+                className="field__input"
+                value={studentCommit}
+                onChange={(e) => setStudentCommit(e.target.value)}
+              />
+            </label>
+            <label className="field">
+              <span className="field__label">公示序号（0～{config?.maxLeaf ?? "524287"}）</span>
+              <input className="field__input" value={leafIndex} onChange={(e) => setLeafIndex(e.target.value)} />
+            </label>
+            <div className="btn-row">
+              <button type="submit" className="btn btn--primary" disabled={loading}>
+                {loading ? "处理中…" : "生成本地证明"}
+              </button>
+            </div>
+            {proveMsg && <pre className="output output--prove section-gap">{proveMsg}</pre>}
+          </form>
         )}
-        {verifyMsg && <pre className="output output--verify section-gap">{verifyMsg}</pre>}
-      </form>
+
+        {activeTab === "verify" && (
+          <form
+            id="panel-verify"
+            role="tabpanel"
+            aria-labelledby="tab-verify"
+            className="tabs__panel"
+            onSubmit={handleVerify}
+          >
+            <h2 className="card__title card__title--in-tab">在线核验</h2>
+            <p className="hint hint--tab">将使用上方「保存位置」中的证明，向平台申请核验。</p>
+            <div className="btn-row">
+              <button type="submit" className="btn btn--secondary" disabled={loading || !chainReady}>
+                {loading ? "处理中…" : "提交核验"}
+              </button>
+            </div>
+            {!chainReady && config && !config.error && (
+              <p className="hint">该功能暂未向本机开放，请联系单位管理员。</p>
+            )}
+            {verifyMsg && <pre className="output output--verify section-gap">{verifyMsg}</pre>}
+          </form>
+        )}
+      </div>
     </div>
   );
 }

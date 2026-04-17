@@ -1,17 +1,17 @@
 /**
- * 演示：学生数 × 门课数 条成绩，用与 circuit.circom 一致的 Poseidon(reference) 建树，
- * 多余叶子填 Poseidon(0,0,0)，输出 Merkle 根与 JSON。
+ * 演示:学生数 × 门课数 条成绩,用与 circuit.circom 一致的 Poseidon(reference) 建树,
+ * 多余叶子填 Poseidon(0,0,0),输出 Merkle 根与 JSON。
  *
  * 用法:
  *   node tools/merkle_data.js
- *     无参数且为交互终端时进入菜单；否则用环境变量（适合 CI：加 --batch）
+ *     无参数且为交互终端时进入菜单；否则用环境变量(适合 CI:加 --batch)
  *   node tools/merkle_data.js --students 10 --courses 10 [--shard-size N] [--write-leaves]
  *   node tools/merkle_data.js --batch
  *     仅用环境变量 STUDENTS、COURSES、MERKLE_SHARD_SIZE、WRITE_LEAVES_LAYER0
  *
- * 输出（默认分片）: merkle_publication.json + merkle_publication_shard_*.json；可选 leaves_layer0.json
+ * 输出(默认分片): merkle_publication.json + merkle_publication_shard_*.json；可选 leaves_layer0.json
  *
- * 约束: 学生数 ≤ 4000，课程数 ≤ 80；且 students × courses ≤ NUM_LEAVES（与 circuit 叶子容量一致）。
+ * 约束: 学生数 ≤ 4000,课程数 ≤ 80；且 students × courses ≤ NUM_LEAVES(与 circuit 叶子容量一致)。
  */
 
 import fs from "fs/promises";
@@ -31,10 +31,10 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const OUT_DIR = path.join(__dirname, "..", "generated");
 
-/** 公示 records 分片大小（条数）；证明端按 leafIndex 只打开一个分片 */
+/** 公示 records 分片大小(条数)；证明端按 leafIndex 只打开一个分片 */
 const DEFAULT_SHARD_SIZE = 5000;
 
-/** 业务上允许的单维上限（与 Merkle 叶子容量无关；乘积仍须 ≤ NUM_LEAVES） */
+/** 业务上允许的单维上限(与 Merkle 叶子容量无关；乘积仍须 ≤ NUM_LEAVES) */
 const MAX_STUDENTS = 4000;
 const MAX_COURSES = 80;
 
@@ -61,19 +61,19 @@ function courseNameFor(courseIdx) {
 function printHelp() {
   console.log(`用法: node tools/merkle_data.js [选项]
 
-无参数: 在交互终端下进入菜单；非 TTY（如 CI）则用环境变量，等同 --batch
+无参数: 在交互终端下进入菜单；非 TTY(如 CI)则用环境变量,等同 --batch
 
 选项:
   -h, --help
-  --batch              不显示菜单，仅使用环境变量（STUDENTS、COURSES、MERKLE_SHARD_SIZE、WRITE_LEAVES_LAYER0）
-  --students N         与菜单/环境变量等价，默认 10
+  --batch              不显示菜单,仅使用环境变量(STUDENTS、COURSES、MERKLE_SHARD_SIZE、WRITE_LEAVES_LAYER0)
+  --students N         与菜单/环境变量等价,默认 10
   --courses M
-  --shard-size N       每片条数，默认 5000
+  --shard-size N       每片条数,默认 5000
   --write-leaves         生成 leaves_layer0.json
 
 环境变量: STUDENTS、COURSES、MERKLE_SHARD_SIZE、WRITE_LEAVES_LAYER0=1
 
-约束: 学生 1～${MAX_STUDENTS}，课程 1～${MAX_COURSES}，students×courses ≤ ${NUM_LEAVES}`);
+约束: 学生 1~${MAX_STUDENTS},课程 1~${MAX_COURSES},students*courses ≤ ${NUM_LEAVES}`);
 }
 
 /**
@@ -96,16 +96,16 @@ function validateDims(raw) {
     throw new Error("课程数须为正整数");
   }
   if (students > MAX_STUDENTS) {
-    throw new Error(`学生数不能超过 ${MAX_STUDENTS}（当前 ${students}）`);
+    throw new Error(`学生数不能超过 ${MAX_STUDENTS}(当前 ${students})`);
   }
   if (courses > MAX_COURSES) {
-    throw new Error(`课程数不能超过 ${MAX_COURSES}（当前 ${courses}）`);
+    throw new Error(`课程数不能超过 ${MAX_COURSES}(当前 ${courses})`);
   }
 
   const total = students * courses;
   if (total > NUM_LEAVES) {
     throw new Error(
-      `students×courses=${total} 超过叶子容量 ${NUM_LEAVES}（请先增大电路 MERKLE_LEVELS 或减少规模）`,
+      `students×courses=${total} 超过叶子容量 ${NUM_LEAVES}(请先增大电路 MERKLE_LEVELS 或减少规模)`,
     );
   }
 
@@ -157,10 +157,10 @@ function parseYesNo(line, defaultBool) {
 
 async function promptInt(rl, label, defaultVal, min, max) {
   for (;;) {
-    const line = (await rl.question(`${label} [默认 ${defaultVal}，范围 ${min}～${max}]: `)).trim();
+    const line = (await rl.question(`${label} [默认 ${defaultVal},范围 ${min}~${max}]: `)).trim();
     const n = line === "" ? defaultVal : parseInt(line, 10);
     if (!Number.isInteger(n) || n < min || n > max) {
-      console.log(`请输入 ${min}～${max} 的整数，或直接回车使用默认值。`);
+      console.log(`请输入 ${min}~${max} 的整数,或直接回车使用默认值。`);
       continue;
     }
     return n;
@@ -180,12 +180,12 @@ async function interactiveMainMenu() {
 
   try {
     console.log("\n========== 学校 Merkle 公示数据生成 ==========");
-    console.log(`电路: 深度 ${MERKLE_LEVELS}，叶子槽位 ${NUM_LEAVES}；学生 ≤${MAX_STUDENTS}，课程 ≤${MAX_COURSES}`);
-    console.log("环境变量可作为默认值：STUDENTS、COURSES、MERKLE_SHARD_SIZE、WRITE_LEAVES_LAYER0\n");
-    console.log("  1 — 小演示：10×10，分片 5000，不写 leaves_layer0");
-    console.log(`  2 — 中等：100×${MAX_COURSES}（课程数取上限），分片 5000，不写 leaves`);
-    console.log("  3 — 满量程：4000×80，分片 5000，不写 leaves");
-    console.log("  4 — 自定义（学生数、课程数、分片大小、是否写 leaves）");
+    console.log(`电路: 深度 ${MERKLE_LEVELS},叶子槽位 ${NUM_LEAVES}；学生 ≤${MAX_STUDENTS},课程 ≤${MAX_COURSES}`);
+    console.log("环境变量可作为默认值:STUDENTS、COURSES、MERKLE_SHARD_SIZE、WRITE_LEAVES_LAYER0\n");
+    console.log("  1 — 小演示:10×10,分片 5000,不写 leaves_layer0");
+    console.log(`  2 — 中等:100×${MAX_COURSES}(课程数取上限),分片 5000,不写 leaves`);
+    console.log("  3 — 满量程:4000×80,分片 5000,不写 leaves");
+    console.log("  4 — 自定义(学生数、课程数、分片大小、是否写 leaves)");
     console.log("  0 — 退出\n");
 
     const choice = (await rl.question("请输入序号 [0-4]: ")).trim();
@@ -231,19 +231,19 @@ async function interactiveMainMenu() {
       }
       const shardSize = await promptInt(
         rl,
-        "每片记录条数（shard-size）",
+        "每片记录条数(shard-size)",
         defShard,
         1,
         Math.max(1, prod),
       );
       const wlLine = await rl.question(
-        `是否生成 leaves_layer0.json（整树 ${NUM_LEAVES} 叶，体积大）？y/N [默认 ${defWriteLeaves ? "Y" : "N"}]: `,
+        `是否生成 leaves_layer0.json(整树 ${NUM_LEAVES} 叶,体积大)？y/N [默认 ${defWriteLeaves ? "Y" : "N"}]: `,
       );
       const writeLeavesLayer0 = parseYesNo(wlLine, defWriteLeaves);
       return validateDims({ students, courses, shardSize, writeLeavesLayer0 });
     }
 
-    throw new Error("无效序号，请重新运行脚本。");
+    throw new Error("无效序号,请重新运行脚本。");
   } finally {
     rl.close();
   }
@@ -281,7 +281,7 @@ async function resolveDims(argv) {
   return parseDimsFromEnv();
 }
 
-/** 可复现的伪随机分数 60–100（与索引相关） */
+/** 可复现的伪随机分数 60–100(与索引相关) */
 function gradeFor(studentIdx, courseIdx) {
   const seed = (studentIdx + 1) * 131 + (courseIdx + 1) * 17;
   return String(60 + (seed % 41));
@@ -297,7 +297,7 @@ async function runDatasetGeneration(opts) {
   } = opts;
 
   console.error(
-    `[1/6] 规模 ${STUDENTS}×${COURSES}=${RECORD_TOTAL} 条；底层叶子槽位 ${NUM_LEAVES}（深度 ${MERKLE_LEVELS}）`,
+    `[1/6] 规模 ${STUDENTS}×${COURSES}=${RECORD_TOTAL} 条；底层叶子槽位 ${NUM_LEAVES}(深度 ${MERKLE_LEVELS})`,
   );
 
   console.error("[2/6] 初始化 Poseidon(reference)…");
@@ -342,13 +342,13 @@ async function runDatasetGeneration(opts) {
   }
 
   console.error(
-    `[4/6] 自底向上建树并求根（对 ${NUM_LEAVES} 片叶子做 ${MERKLE_LEVELS} 层 Poseidon，可能需数分钟；与旧版相比不再对同一棵树做第二次完整归约）…`,
+    `[4/6] 自底向上建树并求根(对 ${NUM_LEAVES} 片叶子做 ${MERKLE_LEVELS} 层 Poseidon,可能需数分钟；与旧版相比不再对同一棵树做第二次完整归约)…`,
   );
   const levels = buildMerkleLevels(poseidon, F, leaves);
   const merkleRoot = levels[MERKLE_LEVELS][0];
 
   console.error(
-    `[5/6] 为每条成绩记录附加 Merkle 路径（共 ${records.length} 条，供证明时跳过整树 Poseidon）…`,
+    `[5/6] 为每条成绩记录附加 Merkle 路径(共 ${records.length} 条,供证明时跳过整树 Poseidon)…`,
   );
   for (let i = 0; i < records.length; i++) {
     const r = records[i];
@@ -373,7 +373,7 @@ async function runDatasetGeneration(opts) {
     paddingLeaf: zeroLeaf,
     ...(RECORD_TOTAL < NUM_LEAVES
       ? { paddingRange: { from: RECORD_TOTAL, to: NUM_LEAVES - 1 } }
-      : { paddingRange: null, note: "叶子已用尽，无 padding" }),
+      : { paddingRange: null, note: "叶子已用尽,无 padding" }),
     recordCount: records.length,
     merkleRoot,
     publicationFormat: "sharded",
@@ -381,8 +381,8 @@ async function runDatasetGeneration(opts) {
     shardCount: Math.ceil(RECORD_TOTAL / SHARD_SIZE) || 0,
     shardFilePattern: "merkle_publication_shard_{index}.json",
     storageNote: writeLeavesLayer0
-      ? `已生成 leaves_layer0.json（完整 ${NUM_LEAVES} 片叶子，体积大）。`
-      : `公示已分片（每片最多 ${SHARD_SIZE} 条）；证明只读 merkle_publication.json + 对应 merkle_publication_shard_*.json。未生成 leaves_layer0.json（默认）；菜单选项 4 可勾选生成整叶文件。`,
+      ? `已生成 leaves_layer0.json(完整 ${NUM_LEAVES} 片叶子,体积大)。`
+      : `公示已分片(每片最多 ${SHARD_SIZE} 条)；证明只读 merkle_publication.json + 对应 merkle_publication_shard_*.json。未生成 leaves_layer0.json(默认)；菜单选项 4 可勾选生成整叶文件。`,
   };
 
   await fs.mkdir(OUT_DIR, { recursive: true });
@@ -390,14 +390,14 @@ async function runDatasetGeneration(opts) {
   const shardCount = Math.ceil(RECORD_TOTAL / SHARD_SIZE) || 0;
 
   console.error(
-    `[6/6] 写入公示（分片 ${shardCount} 个文件 + 元数据 merkle_publication.json；共 ${records.length} 条；leaves_layer0 ${
-      writeLeavesLayer0 ? `含 ${NUM_LEAVES} 叶` : "跳过（默认）"
-    }）…`,
+    `[6/6] 写入公示(分片 ${shardCount} 个文件 + 元数据 merkle_publication.json；共 ${records.length} 条；leaves_layer0 ${
+      writeLeavesLayer0 ? `含 ${NUM_LEAVES} 叶` : "跳过(默认)"
+    })…`,
   );
 
   const metaCompact = JSON.stringify(publication);
   await fs.writeFile(path.join(OUT_DIR, "merkle_publication.json"), metaCompact, "utf8");
-  console.error("      已写入 merkle_publication.json（仅元数据，无 records）");
+  console.error("      已写入 merkle_publication.json(仅元数据,无 records)");
 
   for (let s = 0; s < shardCount; s++) {
     const from = s * SHARD_SIZE;
@@ -412,7 +412,7 @@ async function runDatasetGeneration(opts) {
     const shardName = `merkle_publication_shard_${s}.json`;
     await fs.writeFile(path.join(OUT_DIR, shardName), JSON.stringify(shard), "utf8");
     if (s === 0 || s === shardCount - 1 || (s + 1) % 20 === 0) {
-      console.error(`      已写入 ${shardName}（${slice.length} 条）`);
+      console.error(`      已写入 ${shardName}(${slice.length} 条)`);
     }
   }
   if (shardCount > 1) {
@@ -427,12 +427,12 @@ async function runDatasetGeneration(opts) {
   if (writeLeavesLayer0) {
     const leavesComment =
       RECORD_TOTAL < NUM_LEAVES
-        ? `第 0 层 ${NUM_LEAVES} 个叶子，索引 0–${RECORD_TOTAL - 1} 为成绩记录，${RECORD_TOTAL}–${
+        ? `第 0 层 ${NUM_LEAVES} 个叶子,索引 0–${RECORD_TOTAL - 1} 为成绩记录,${RECORD_TOTAL}–${
             NUM_LEAVES - 1
           } 为 padding`
-        : `第 0 层 ${NUM_LEAVES} 个叶子已全部为成绩记录（无 padding）`;
+        : `第 0 层 ${NUM_LEAVES} 个叶子已全部为成绩记录(无 padding)`;
 
-    console.error(`      正在序列化并写入 leaves_layer0.json（${NUM_LEAVES} 个叶子，体积大）…`);
+    console.error(`      正在序列化并写入 leaves_layer0.json(${NUM_LEAVES} 个叶子,体积大)…`);
     await fs.writeFile(
       path.join(OUT_DIR, "leaves_layer0.json"),
       JSON.stringify(
@@ -446,13 +446,13 @@ async function runDatasetGeneration(opts) {
       ),
       "utf8",
     );
-    console.error("      已写入 leaves_layer0.json（紧凑格式）");
+    console.error("已写入 leaves_layer0.json(紧凑格式)");
   } else {
-    console.error("      已跳过 leaves_layer0.json（菜单选项 4 可开启）");
+    console.error("已跳过 leaves_layer0.json(菜单选项 4 可开启)");
   }
 
   const sampleInput = {
-    comment: `leafIndex=0（${r0.studentLabel} / ${r0.courseName}）的 snarkjs 输入示例；路径与分片公示同批建树一致（见 merkle_publication_shard_0.json）`,
+    comment: `leafIndex=0(${r0.studentLabel} / ${r0.courseName})的 snarkjs 输入示例；路径与分片公示同批建树一致(见 merkle_publication_shard_0.json)`,
     root: merkleRoot,
     min: "60",
     max: "100",
